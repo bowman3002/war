@@ -130,24 +130,6 @@ public class TeamConfigBag {
 		return null;
 	}
 	
-	public TeamSpawnStyle resolveSpawnStyle() {
-		if (this.contains(TeamConfig.SPAWNSTYLE)) {
-			return (TeamSpawnStyle)this.bag.get(TeamConfig.SPAWNSTYLE); 
-		} else if (this.warzone != null && this.warzone.getTeamDefaultConfig().contains(TeamConfig.SPAWNSTYLE)){
-			// use War default config
-			return this.warzone.getTeamDefaultConfig().resolveSpawnStyle();
-		} else {
-			return War.war.getTeamDefaultConfig().resolveSpawnStyle();
-		}
-	}
-	
-	public TeamSpawnStyle getSpawnStyle() {
-		if (this.contains(TeamConfig.SPAWNSTYLE)) {
-			return (TeamSpawnStyle)this.bag.get(TeamConfig.SPAWNSTYLE); 
-		}
-		return null;
-	}
-	
 	public void loadFrom(ConfigurationSection teamConfigSection) {
 		for (TeamConfig config : TeamConfig.values()) {
 			if (teamConfigSection.contains(config.toString())) {

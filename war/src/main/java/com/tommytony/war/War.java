@@ -185,6 +185,10 @@ public class War extends JavaPlugin {
 		warzoneDefaultConfig.put(WarzoneConfig.UNBREAKABLE, false);
 		warzoneDefaultConfig.put(WarzoneConfig.DEATHMESSAGES, true);
 		warzoneDefaultConfig.put(WarzoneConfig.JOINMIDBATTLE, true);
+                warzoneDefaultConfig.put(WarzoneConfig.MEDICTIME, 600);
+                warzoneDefaultConfig.put(WarzoneConfig.COMMANDTIME, 100);
+                warzoneDefaultConfig.put(WarzoneConfig.CAPTURETIME, 600);
+                warzoneDefaultConfig.put(WarzoneConfig.SPAWNSTYLE, TeamSpawnStyle.SMALL);
 		
 		teamDefaultConfig.put(TeamConfig.FLAGMUSTBEHOME, true);
 		teamDefaultConfig.put(TeamConfig.FLAGPOINTSONLY, false);
@@ -195,7 +199,6 @@ public class War extends JavaPlugin {
 		teamDefaultConfig.put(TeamConfig.PLAYERLOADOUTASDEFAULT, false);
 		teamDefaultConfig.put(TeamConfig.RESPAWNTIMER, 0);
 		teamDefaultConfig.put(TeamConfig.SATURATION, 10);
-		teamDefaultConfig.put(TeamConfig.SPAWNSTYLE, TeamSpawnStyle.SMALL);
 		teamDefaultConfig.put(TeamConfig.TEAMSIZE, 10);
 		teamDefaultConfig.put(TeamConfig.PERMISSION, "war.player");
 		

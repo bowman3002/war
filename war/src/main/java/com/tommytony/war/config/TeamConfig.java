@@ -11,7 +11,6 @@ public enum TeamConfig {
 	PLAYERLOADOUTASDEFAULT (Boolean.class),
 	RESPAWNTIMER (Integer.class),
 	SATURATION (Integer.class),
-	SPAWNSTYLE (TeamSpawnStyle.class),
 	TEAMSIZE (Integer.class),
         PERMISSION (String.class);
 	

@@ -97,7 +97,7 @@ public class Team {
 		int y = this.teamSpawn.getBlockY();
 		int z = this.teamSpawn.getBlockZ();
 
-		TeamSpawnStyle style = this.getTeamConfig().resolveSpawnStyle();
+		TeamSpawnStyle style = warzone.getWarzoneConfig().resolveSpawnStyle();
 		if (style.equals(TeamSpawnStyle.INVISIBLE)) {
 			this.spawnVolume.setCornerOne(this.warzone.getWorld().getBlockAt(x, y - 1, z));
 			this.spawnVolume.setCornerTwo(this.warzone.getWorld().getBlockAt(x, y + 3, z));
@@ -137,7 +137,7 @@ public class Team {
 		Material light = Material.getMaterial(this.warzone.getWarzoneMaterials().getLightId());
 		byte lightData = this.warzone.getWarzoneMaterials().getLightData();
 
-		TeamSpawnStyle style = this.getTeamConfig().resolveSpawnStyle();
+		TeamSpawnStyle style = warzone.getWarzoneConfig().resolveSpawnStyle();
 		if (style.equals(TeamSpawnStyle.INVISIBLE)) {
 			// nothing but glowstone
 			Block lightBlock = this.warzone.getWorld().getBlockAt(x, y - 1, z);
