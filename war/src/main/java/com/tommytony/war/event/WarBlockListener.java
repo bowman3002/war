@@ -55,11 +55,15 @@ public class WarBlockListener implements Listener {
 		Team team = Team.getTeamByPlayerName(player.getName());
 		Warzone zone = Warzone.getZoneByLocation(player);
 		// Monument capturing
+                
+                if(block.getTypeId() == Material.WOOL.getId() && block.getData() == team.getKind().getData()) {
+                    player.getInventory().addItem(new ItemStack(Material.WOOL, 2, team.getKind().getData()));
+                }
+                
 		if (team != null && block != null && zone != null && zone.isMonumentCenterBlock(block) && block.getType() == team.getKind().getMaterial() && block.getData() == team.getKind().getData()) {
 			Monument monument = zone.getMonumentFromCenterBlock(block);
 			if (monument != null && !monument.hasOwner()) {
 				monument.capture(team);
-                                player.getInventory().addItem(new ItemStack(Material.WOOL, 1, team.getKind().getData()));
 				List<Team> teams = zone.getTeams();
 				
 				if (War.war.isSpoutServer()) {
@@ -126,8 +130,6 @@ public class WarBlockListener implements Listener {
 		if (team != null && block.getType() == team.getKind().getMaterial() && block.getData() == team.getKind().getData()) {
 			War.war.badMsg(player, "You can only use your team's blocks to capture monuments.");
 			cancelAndKeepItem(event);
-                        
-                        player.getInventory().addItem(new ItemStack(Material.WOOL, 1, team.getKind().getData()));
                 
 			return;
 		}
