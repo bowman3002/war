@@ -169,7 +169,7 @@ public class WarzoneTxtMapper {
 			// spawnStyle
 			String spawnStyle = warzoneConfig.getString("spawnStyle");
 			if (spawnStyle != null && !spawnStyle.equals("")) {
-				warzone.getTeamDefaultConfig().put(TeamConfig.SPAWNSTYLE, TeamSpawnStyle.getStyleFromString(spawnStyle));
+				warzone.getWarzoneConfig().put(WarzoneConfig.SPAWNSTYLE, TeamSpawnStyle.getStyleFromString(spawnStyle));
 			}
 
 			// flagReturn

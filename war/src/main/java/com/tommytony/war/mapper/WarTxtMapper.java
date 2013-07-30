@@ -189,7 +189,7 @@ public class WarTxtMapper {
 		// defaultSpawnStyle
 		String spawnStyle = warConfig.getString("defaultspawnStyle");
 		if (spawnStyle != null && !spawnStyle.equals("")) {
-			War.war.getTeamDefaultConfig().put(TeamConfig.SPAWNSTYLE, TeamSpawnStyle.getStyleFromString(spawnStyle));
+			War.war.getWarzoneDefaultConfig().put(WarzoneConfig.SPAWNSTYLE, TeamSpawnStyle.getStyleFromString(spawnStyle));
 		}
 
 		// defaultFlagReturn

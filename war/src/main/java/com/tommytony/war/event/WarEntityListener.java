@@ -44,6 +44,8 @@ import com.tommytony.war.spout.SpoutDisplayer;
 import com.tommytony.war.structure.Bomb;
 import com.tommytony.war.utility.DeferredBlockReset;
 import com.tommytony.war.utility.LoadoutSelection;
+import org.bukkit.entity.Horse;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 /**
  * Handles Entity-Events
@@ -165,7 +167,7 @@ public class WarEntityListener implements Listener {
 						}
 					}
 					
-					defenderWarzone.handleDeath(d);
+					defenderWarzone.handleDeath(d, attackerTeam);
 					
 					if (!defenderWarzone.getWarzoneConfig().getBoolean(WarzoneConfig.REALDEATHS)) {
 						// fast respawn, don't really die
@@ -178,7 +180,7 @@ public class WarEntityListener implements Listener {
 					Bomb bomb = defenderWarzone.getBombForThief(d.getName());
 										
 					// Kill the bomber 
-					defenderWarzone.handleDeath(d);
+					defenderWarzone.handleDeath(d, attackerTeam);
 					
 					if (defenderWarzone.getWarzoneConfig().getBoolean(WarzoneConfig.REALDEATHS)) {
 						// and respawn him and remove from deadmen (cause realdeath + handleDeath means no respawn and getting queued up for onPlayerRespawn)
@@ -274,7 +276,7 @@ public class WarEntityListener implements Listener {
 					}
 				}
 				
-				defenderWarzone.handleDeath(d);
+				defenderWarzone.handleDeath(d, null);
 				
 				if (!defenderWarzone.getWarzoneConfig().getBoolean(WarzoneConfig.REALDEATHS)) {
 					// fast respawn, don't really die
@@ -463,7 +465,7 @@ public class WarEntityListener implements Listener {
 						}
 					}
 					
-					zone.handleDeath(player);
+					zone.handleDeath(player, null);
 					
 					if (!zone.getWarzoneConfig().getBoolean(WarzoneConfig.REALDEATHS)) {
 						// fast respawn, don't really die
@@ -571,7 +573,7 @@ public class WarEntityListener implements Listener {
 			event.getDrops().clear();
 			if (!zone.getWarzoneConfig().getBoolean(WarzoneConfig.REALDEATHS)) {
 				// catch the odd death that gets away from us when usually intercepting and preventing deaths
-				zone.handleDeath(player);
+				zone.handleDeath(player, null);
 				
 				if (zone.getWarzoneConfig().getBoolean(WarzoneConfig.DEATHMESSAGES)) {
 					for (Team team : zone.getTeams()) {
@@ -598,5 +600,4 @@ public class WarEntityListener implements Listener {
 			}
 		}
 	}
-
 }

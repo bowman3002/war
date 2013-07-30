@@ -538,7 +538,7 @@ public class WarPlayerListener implements Listener {
 			}
 
 			// Monuments
-			if (playerTeam != null && playerWarzone.nearAnyOwnedMonument(playerLoc, playerTeam) && player.getHealth() < 20 && player.getHealth() > 0 // don't heal the dead
+			/*if (playerTeam != null && playerWarzone.nearAnyOwnedMonument(playerLoc, playerTeam) && player.getHealth() < 20 && player.getHealth() > 0 // don't heal the dead
 					&& this.random.nextInt(7) == 3) { // one chance out of many of getting healed
 				double currentHp = player.getHealth();
 				double newHp = Math.min(20, currentHp + locZone.getWarzoneConfig().getInt(WarzoneConfig.MONUMENTHEAL));
@@ -556,7 +556,7 @@ public class WarPlayerListener implements Listener {
 				}
 				War.war.msg(player, "Your dance pleases the monument's voodoo. You gain " + heartNum + "heart" + isS + "!");
 				return;
-			}
+			}*/
 
 			// Flag capture
 			if (playerWarzone.isFlagThief(player.getName())) {

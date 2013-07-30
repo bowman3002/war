@@ -39,6 +39,24 @@ public class WarzoneConfigBag {
 			return War.war.getWarzoneDefaultConfig().getValue(config);
 		}
 	}
+        
+        public TeamSpawnStyle resolveSpawnStyle() {
+		if (this.contains(WarzoneConfig.SPAWNSTYLE)) {
+			return (TeamSpawnStyle)this.bag.get(WarzoneConfig.SPAWNSTYLE); 
+		} else if (this.warzone != null && this.warzone.getWarzoneConfig().contains(WarzoneConfig.SPAWNSTYLE)){
+			// use War default config
+			return this.warzone.getWarzoneConfig().resolveSpawnStyle();
+		} else {
+			return War.war.getWarzoneDefaultConfig().resolveSpawnStyle();
+		}
+	}
+        
+        public TeamSpawnStyle getSpawnStyle() {
+		if (this.contains(WarzoneConfig.SPAWNSTYLE)) {
+			return (TeamSpawnStyle)this.bag.get(WarzoneConfig.SPAWNSTYLE); 
+		}
+		return null;
+	}
 	
 	public Integer getInt(WarzoneConfig config) {
 		if (bag.containsKey(config)) {
@@ -65,16 +83,20 @@ public class WarzoneConfigBag {
 					this.put(config, warzoneConfigSection.getInt(config.toString()));
 				} else if (config.getConfigType().equals(Boolean.class)) {
 					this.put(config, warzoneConfigSection.getBoolean(config.toString()));
-				}
+				} else if (config.getConfigType().equals(TeamSpawnStyle.class)) {
+                                        this.put(config, TeamSpawnStyle.getStyleFromString(warzoneConfigSection.getString(config.toString())));
+                                }
 			}
 		}
 	}
 
 	public void saveTo(ConfigurationSection warzoneConfigSection) {
 		for (WarzoneConfig config : WarzoneConfig.values()) {
-			if (this.bag.containsKey(config)) {
+			if (this.bag.containsKey(config) && !config.equals(WarzoneConfig.SPAWNSTYLE)) {
 				warzoneConfigSection.set(config.toString(), this.bag.get(config));
-			}
+			}  else if (this.bag.containsKey(config) && config.equals(WarzoneConfig.SPAWNSTYLE)) {
+                            warzoneConfigSection.set(config.toString(), this.bag.get(config).toString());
+                        }
 		}
 	}
 	
@@ -95,6 +117,9 @@ public class WarzoneConfigBag {
 						this.warzone.getLobby().setLocation(this.warzone.getTeleport());
 						this.warzone.getLobby().initialize();
 					}
+				} else if (warzoneConfig.getConfigType().equals(TeamSpawnStyle.class)) {
+					TeamSpawnStyle spawnValue = TeamSpawnStyle.getStyleFromString(namedParams.get(namedParam));
+					this.bag.put(warzoneConfig, spawnValue);
 				}
 				returnMessage += " " + warzoneConfig.toString() + " set to " + namedParams.get(namedParam); 
 			} else if (namedParam.equals("delete")) {
@@ -109,5 +134,9 @@ public class WarzoneConfigBag {
 			}
 		}
 		return returnMessage;
+	}
+        
+        public boolean contains(WarzoneConfig config) {
+		return this.bag.containsKey(config);
 	}
 }

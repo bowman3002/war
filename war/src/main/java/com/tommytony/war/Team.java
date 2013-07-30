@@ -26,6 +26,10 @@ import com.tommytony.war.utility.Direction;
 import com.tommytony.war.utility.SignHelper;
 import com.tommytony.war.volume.BlockInfo;
 import com.tommytony.war.volume.Volume;
+import org.bukkit.Bukkit;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
 import org.kitteh.tag.TagAPI;
 
 /**
@@ -44,6 +48,9 @@ public class Team {
 	private Volume flagVolume;
 	private final Warzone warzone;
 	private TeamKind kind;
+        private org.bukkit.scoreboard.Team scoreTeam;
+        private Score score;
+        private Score lives;
 
 	private TeamConfigBag teamConfig;
 	private InventoryBag inventories;
@@ -57,6 +64,15 @@ public class Team {
 		this.setSpawnVolume(new Volume(name, warzone.getWorld()));
 		this.kind = kind;
 		this.setFlagVolume(null); // no flag at the start
+                scoreTeam=warzone.getBoard().registerNewTeam(name);
+                scoreTeam.setCanSeeFriendlyInvisibles(true);
+                scoreTeam.setDisplayName(kind.getColor() + name);
+                
+                score = warzone.getObjective().getScore(Bukkit.getOfflinePlayer(kind.getColor() + name + "Points"));
+                score.setScore(points);   
+                
+                lives = warzone.getObjective().getScore(Bukkit.getOfflinePlayer(kind.getColor() + name + "Lives"));
+                lives.setScore(getRemainingLifes());
 	}
 
 	public static Team getTeamByPlayerName(String playerName) {
@@ -377,6 +393,8 @@ public class Team {
 
 	public void addPlayer(Player player) {
 		this.players.add(player);
+                scoreTeam.addPlayer(player);
+                player.setScoreboard(warzone.getBoard());
 		if (War.war.isTagServer()) {
 			TagAPI.refreshPlayer(player);
 		}
@@ -420,6 +438,8 @@ public class Team {
 		for (Player player : this.players) {
 			if (player.getName().equals(name)) {
 				thePlayer = player;
+                                scoreTeam.removePlayer(player);
+                                thePlayer.setScoreboard(warzone.getManager().getNewScoreboard());
 			}
 		}
 		if (thePlayer != null) {
@@ -465,6 +485,7 @@ public class Team {
 
 	public void setRemainingLives(int remainingLives) {
 		this.remainingLives = remainingLives;
+                lives.setScore(remainingLives);
 	}
 
 	public int getRemainingLifes() {
@@ -481,6 +502,7 @@ public class Team {
 		}
 		if (atLeastOnePlayerOnTeam && atLeastOnePlayerOnOtherTeam) {
 			this.points++;
+                        score.setScore(score.getScore()+1);
 		} else if (!atLeastOnePlayerOnOtherTeam) {
 			this.teamcast("Can't score until at least one player joins another team.");
 		}
@@ -690,4 +712,11 @@ public class Team {
 	public TeamConfigBag getTeamConfig() {
 		return this.teamConfig;
 	}
+        
+        public void fillHealth(String monumentName) {
+        for(Player p:players) {
+            p.setHealth(20);
+        }
+        teamcast("You have been healed by Medic " + monumentName);
+    }
 }

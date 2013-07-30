@@ -6,29 +6,50 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 import com.tommytony.war.Team;
+import com.tommytony.war.War;
 import com.tommytony.war.Warzone;
+import com.tommytony.war.config.MonumentMode;
+import com.tommytony.war.config.WarzoneConfig;
+import com.tommytony.war.utility.Countdown;
 import com.tommytony.war.utility.Direction;
 import com.tommytony.war.volume.BlockInfo;
 import com.tommytony.war.volume.Volume;
+import org.bukkit.scheduler.BukkitTask;
 
 /**
  *
  * @author tommytony
  *
  */
-public class Monument {
+public class Monument implements Runnable{
 	private Location location;
 	private Volume volume;
+        
+        private MonumentMode mode;
+        private BukkitTask currentSch=null;
+        private BukkitTask currentCountdown=null;
+        private boolean locked;
 
 	private Team ownerTeam = null;
 	private final String name;
 	private Warzone warzone;
-
+        
+        @Deprecated
 	public Monument(String name, Warzone warzone, Location location) {
 		this.name = name;
 		this.location = location;
 		this.warzone = warzone;
 		this.volume = new Volume(name, warzone.getWorld());
+                this.mode = MonumentMode.MEDIC;
+		this.setLocation(location);
+	}
+        
+        public Monument(String name, Warzone warzone, Location location, MonumentMode m) {
+		this.name = name;
+		this.location = location;
+		this.warzone = warzone;
+		this.volume = new Volume(name, warzone.getWorld());
+                this.mode=m;
 		this.setLocation(location);
 	}
 
@@ -205,10 +226,12 @@ public class Monument {
 
 	public void capture(Team team) {
 		this.ownerTeam = team;
+                startTimer();
 	}
 
 	public void uncapture() {
 		this.ownerTeam = null;
+                stopTimer();
 	}
 
 	public Location getLocation() {
@@ -247,4 +270,97 @@ public class Monument {
 
 		return this.ownerTeam;
 	}
+        
+        public void startTimer()
+        {
+            if(currentSch==null)
+            {
+                if(mode.equals(MonumentMode.CAPTURE))
+                {
+                    currentSch=War.war.getServer().getScheduler().runTaskLaterAsynchronously(War.war, this, warzone.getWarzoneConfig().getInt(WarzoneConfig.CAPTURETIME));
+                    if(warzone.getWarzoneConfig().getInt(WarzoneConfig.CAPTURETIME)>=200)
+                        currentCountdown=War.war.getServer().getScheduler().runTaskTimerAsynchronously(War.war, new Countdown(warzone, this), 0, 100);
+                }
+                else if(mode.equals(MonumentMode.COMMAND))
+                {
+                    currentSch=War.war.getServer().getScheduler().runTaskTimerAsynchronously(War.war, this, warzone.getWarzoneConfig().getInt(WarzoneConfig.COMMANDTIME), warzone.getWarzoneConfig().getInt(WarzoneConfig.COMMANDTIME));
+                    if(warzone.getWarzoneConfig().getInt(WarzoneConfig.COMMANDTIME)>=200)
+                        currentCountdown=War.war.getServer().getScheduler().runTaskTimerAsynchronously(War.war, new Countdown(warzone, this), 0, 100);
+                }
+                else if(mode.equals(MonumentMode.MEDIC))
+                    currentSch=War.war.getServer().getScheduler().runTaskTimerAsynchronously(War.war, this, warzone.getWarzoneConfig().getInt(WarzoneConfig.MEDICTIME), warzone.getWarzoneConfig().getInt(WarzoneConfig.MEDICTIME));
+            }
+        }
+        
+        public void stopTimer()
+        {
+            if(currentSch != null) {
+                    War.war.getServer().getScheduler().cancelTask(currentSch.getTaskId());
+                    currentSch=null;
+            }
+            if(currentCountdown != null) {
+                War.war.getServer().getScheduler().cancelTask(currentCountdown.getTaskId());
+                currentCountdown=null;
+            }
+        }
+        
+        public void run() 
+        {
+            if(mode.equals(MonumentMode.CAPTURE)) {
+                capture();
+            }
+            else if(mode.equals(MonumentMode.COMMAND)) {
+                command();
+            }
+            else if(mode.equals(MonumentMode.MEDIC)) {
+                medic();
+            }
+        }
+        
+        public void lockMonument()
+        {          
+            for(int x=volume.getMinX(); x<=volume.getMaxX(); x++)
+                for(int y=volume.getMinY(); y<=volume.getMaxY(); y++)
+                    for(int z=volume.getMinZ(); z<=volume.getMaxZ(); z++)
+                    {
+                        Block b=warzone.getWorld().getBlockAt(x, y, z);
+                        if(b.getTypeId()!=Material.AIR.getId() && b.getTypeId()!=Material.WOOL.getId())
+                        {
+                            b.setTypeId(warzone.getWarzoneMaterials().getLockId());
+                            b.setData(warzone.getWarzoneMaterials().getLockData());
+                        }
+                    }
+        }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public MonumentMode getMode() {
+        return mode;
+    }
+    
+    public void capture()
+    {
+        lockMonument();
+        ownerTeam.addPoint();
+        locked=true;
+        warzone.broadcast("Team " + ownerTeam.getName() + " has locked monument " + name + "!");
+        warzone.checkWin(ownerTeam);
+        War.war.getServer().getScheduler().cancelTask(currentCountdown.getTaskId());
+        currentCountdown=null;
+    }
+    
+    public void command()
+    {
+        ownerTeam.addPoint();
+        warzone.broadcast("Team " + ownerTeam.getName() + " has gained a point from monument " + name + "!");
+        warzone.checkWin(ownerTeam);
+        
+    }
+    
+    public void medic()
+    {
+        ownerTeam.fillHealth(name);
+    }
 }

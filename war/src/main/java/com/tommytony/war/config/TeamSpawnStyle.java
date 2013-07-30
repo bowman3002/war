@@ -7,6 +7,7 @@ package com.tommytony.war.config;
  */
 public enum TeamSpawnStyle {
 	INVISIBLE,
+        RANDOM,
 	SMALL,
 	FLAT,
 	BIG;

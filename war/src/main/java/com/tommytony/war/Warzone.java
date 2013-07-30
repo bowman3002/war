@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.bukkit.scoreboard.*;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -27,6 +28,7 @@ import com.tommytony.war.config.InventoryBag;
 import com.tommytony.war.config.TeamConfig;
 import com.tommytony.war.config.TeamConfigBag;
 import com.tommytony.war.config.TeamKind;
+import com.tommytony.war.config.TeamSpawnStyle;
 import com.tommytony.war.config.WarzoneConfig;
 import com.tommytony.war.config.WarzoneConfigBag;
 import com.tommytony.war.job.InitZoneJob;
@@ -49,6 +51,7 @@ import com.tommytony.war.utility.PotionEffectHelper;
 import com.tommytony.war.volume.BlockInfo;
 import com.tommytony.war.volume.Volume;
 import com.tommytony.war.volume.ZoneVolume;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 /**
@@ -67,8 +70,14 @@ public class Warzone {
 	private Location teleport;
 	private ZoneLobby lobby;
 	private Location rallyPoint;
+        
+        private ScoreboardManager manager = Bukkit.getScoreboardManager();
+        private Scoreboard board = manager.getNewScoreboard();
+        private Objective objective = board.registerNewObjective("Score", "dummy");
 	
 	private final List<String> authors = new ArrayList<String>();
+        
+        private List<Location> extraSpawns = new ArrayList<Location>();
 	
 	private final int minSafeDistanceFromWall = 6;
 	private List<ZoneWallGuard> zoneWallGuards = new ArrayList<ZoneWallGuard>();
@@ -108,6 +117,11 @@ public class Warzone {
 				War.war.getWarhubMaterials().getLightId(),
 				War.war.getWarhubMaterials().getLightData()
 			);
+                
+                objective=getBoard().registerNewObjective("score", "dummy");
+                objective.setDisplayName(getName() + "Scoreboard");
+                objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+                
 	}
 
 	public static Warzone getZoneByName(String name) {
@@ -353,7 +367,12 @@ public class Warzone {
 	public void respawnPlayer(Team team, Player player) {
 		this.handleRespawn(team, player);
 		// Teleport the player back to spawn
-		player.teleport(team.getTeamSpawn());
+		if(!warzoneConfig.resolveSpawnStyle().equals(TeamSpawnStyle.RANDOM)) {
+                    player.teleport(team.getTeamSpawn());
+                }
+                else if(warzoneConfig.resolveSpawnStyle().equals(TeamSpawnStyle.RANDOM)) {
+                    player.teleport(this.findEmptySpawn());
+                }
 	}
 
 	public void respawnPlayer(PlayerMoveEvent event, Team team, Player player) {
@@ -445,6 +464,10 @@ public class Warzone {
 				}
 			}
 		}
+                if(loadout.keySet().size()!=100 && loadout.keySet().size()!=101 && loadout.keySet().size()!=102 && loadout.keySet().size()!=103)
+                {
+                    playerInv.addItem(new ItemStack(Material.WOOL, 1, (short)team.getKind().getData()));
+                }
 		if (this.getWarzoneConfig().getBoolean(WarzoneConfig.BLOCKHEADS)) {
 			playerInv.setHelmet(new ItemStack(team.getKind().getMaterial(), 1, (short) 1, new Byte(team.getKind().getData())));
 		} else {
@@ -857,7 +880,7 @@ public class Warzone {
 		return lowestNoOfPlayers;
 	}
 
-	public void handleDeath(Player player) {
+	public void handleDeath(Player player, Team killTeam) {
 		// THIS ISN'T THREAD SAFE
 		// Every death and player movement should ideally occur in sequence because
 		// 1) a death can cause the end of the game by emptying a lifepool causing the max score to be reached
@@ -896,7 +919,7 @@ public class Warzone {
 								SpoutPlayer sp = SpoutManager.getPlayer(p);
 								if (sp.isSpoutCraftEnabled()) {
 					                sp.sendNotification(
-					                		SpoutDisplayer.cleanForNotification("Round over! " + playerTeam.getKind().getColor() + playerTeam.getName()),
+					                		SpoutDisplayer.cleanForNotification("Point Given! " + playerTeam.getKind().getColor() + playerTeam.getName()),
 					                		SpoutDisplayer.cleanForNotification("ran out of lives."),
 					                		playerTeam.getKind().getMaterial(),
 					                		playerTeam.getKind().getData(),
@@ -905,7 +928,7 @@ public class Warzone {
 							}
 						}
 						
-						t.teamcast("The battle is over. Team " + playerTeam.getName() + " lost: " + player.getName() + " died and there were no lives left in their life pool.");
+						/*t.teamcast("The battle is over. Team " + playerTeam.getName() + " lost: " + player.getName() + " died and there were no lives left in their life pool.");
 	
 						if (t.getPlayers().size() != 0 && !t.getTeamConfig().resolveBoolean(TeamConfig.FLAGPOINTSONLY)) {
 							if (!t.getName().equals(playerTeam.getName())) {
@@ -914,8 +937,13 @@ public class Warzone {
 								t.resetSign();
 							}
 							scores += t.getName() + "(" + t.getPoints() + "/" + t.getTeamConfig().resolveInt(TeamConfig.MAXSCORE) + ") ";
-						}
+						}*/
 					}
+                                        
+                                        if(killTeam!=null && !killTeam.getTeamConfig().resolveBoolean(TeamConfig.FLAGPOINTSONLY))
+                                        {
+                                            scores += killTeam.getName() + "(" + killTeam.getPoints() + "/" + killTeam.getTeamConfig().resolveInt(TeamConfig.MAXSCORE) + ") ";
+                                        }
 					
 					if (!scores.equals("")) {
 						for (Team t : teams) {
@@ -939,14 +967,14 @@ public class Warzone {
 						}
 	
 						this.handleScoreCapReached(winnersStr);
-					} else {
+					}/* else {
 						// A new battle starts. Reset the zone but not the teams.
 						for (Team t : teams) {
 							t.teamcast("A new battle begins. Resetting warzone...");
 						}
 						
 						this.reinitialize();
-					}
+					}*/
 				}
 			} else {
 				// player died without causing his team's demise
@@ -1033,7 +1061,7 @@ public class Warzone {
 				// Lifepool empty warning
 				if (remaining - 1 == 0) {
 					for (Team t : this.getTeams()) {
-						t.teamcast("Team " + playerTeam.getName() + "'s life pool is empty. One more death and they lose the battle!");
+						t.teamcast("Team " + playerTeam.getName() + "'s life pool is empty. One more death and they lose a point!");
 					}
 				}
 			}
@@ -1045,6 +1073,7 @@ public class Warzone {
 		this.isReinitializing = true;
 		this.getVolume().resetBlocksAsJob();
 		this.initializeZoneAsJob();
+                this.cancelSchedule();
 	}
 
 	public void handlePlayerLeave(Player player, Location destination, PlayerMoveEvent event, boolean removeFromTeam) {
@@ -1098,6 +1127,9 @@ public class Warzone {
 					break;
 				}
 			}
+                        if(zoneEmpty) {
+                            cancelSchedule();
+                        }
 			if (zoneEmpty && this.getWarzoneConfig().getBoolean(WarzoneConfig.RESETONEMPTY)) {
 				// reset the zone for a new game when the last player leaves
 				for (Team team : this.getTeams()) {
@@ -1502,4 +1534,125 @@ public class Warzone {
 	public WarzoneMaterials getWarzoneMaterials() {
 		return warzoneMaterials;
 	}
+        
+        public Location findEmptySpawn()
+    {
+        Location empty=teams.get(0).getTeamSpawn();
+        double distance=-999999999;
+        List<Player> players = new ArrayList<Player>();
+        List<Location> spawns = new ArrayList<Location>();
+        for(Team t:teams)
+        {
+            for(Player p:t.getPlayers())
+            {
+                players.add(p);
+            }
+            spawns.add(t.getTeamSpawn());
+        }
+        for(Location l:extraSpawns) {
+            spawns.add(l);
+        }
+        
+        for(Location l:spawns)
+        {
+            double tempDistance=l.distance(players.get(0).getLocation());
+            for(Player p:players)
+            {
+                if((l.distance(p.getLocation()))<tempDistance) {
+                    tempDistance=l.distance(p.getLocation());
+                }
+            }
+            
+            if(tempDistance>distance)
+            {
+                empty=l;
+                distance=tempDistance;
+            }
+        }
+        return empty;
+    }
+    
+    public List<Location> getExtraSpawns() {
+        return extraSpawns;
+    }
+    
+    public void addExtraSpawn(Location l) {
+        extraSpawns.add(l);
+    }
+    
+    public Team getTeamByPlayer(Player p)
+    {
+        for(Team t:teams)
+        {
+            if(t.getPlayers().contains(p))
+            {
+                return t;
+            }
+        }
+        
+        return null;
+    }
+    
+    private void cancelSchedule() {
+        for(Monument m : monuments)
+            m.stopTimer();
+    }
+
+    public void broadcast(String s) {
+        for(Team t:teams)
+            t.teamcast(s);
+    }
+    
+    public boolean checkWin(Team team)
+    {
+        // Detect win conditions
+        if (team.getPoints() >= team.getTeamConfig().resolveInt(TeamConfig.MAXSCORE))
+        {
+                this.handleScoreCapReached(team.getName());
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return the manager
+     */
+    public ScoreboardManager getManager() {
+        return manager;
+    }
+
+    /**
+     * @param manager the manager to set
+     */
+    public void setManager(ScoreboardManager manager) {
+        this.manager = manager;
+    }
+
+    /**
+     * @return the board
+     */
+    public Scoreboard getBoard() {
+        return board;
+    }
+
+    /**
+     * @param board the board to set
+     */
+    public void setBoard(Scoreboard board) {
+        this.board = board;
+    }
+
+    /**
+     * @return the score
+     */
+    public Objective getObjective() {
+        return objective;
+    }
+
+    /**
+     * @param score the score to set
+     */
+    public void setObjective(Objective score) {
+        this.objective = score;
+    }
 }

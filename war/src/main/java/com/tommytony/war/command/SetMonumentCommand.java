@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 import com.tommytony.war.War;
 import com.tommytony.war.Warzone;
+import com.tommytony.war.config.MonumentMode;
 import com.tommytony.war.mapper.WarzoneYmlMapper;
 import com.tommytony.war.structure.Monument;
 
@@ -29,12 +30,12 @@ public class SetMonumentCommand extends AbstractZoneMakerCommand {
 		}
 
 		Player player = (Player) this.getSender();
+                
+                Warzone zone = Warzone.getZoneByLocation(player);
 
-		if (this.args.length != 1) {
+		if (this.args.length != 1  && zone.hasMonument(args[0]) && this.args.length != 2) {
 			return false;
 		}
-
-		Warzone zone = Warzone.getZoneByLocation(player);
 
 		if (zone == null) {
 			return false;
@@ -55,7 +56,7 @@ public class SetMonumentCommand extends AbstractZoneMakerCommand {
 			War.war.log(this.getSender().getName() + " moved monument " + monument.getName() + " in warzone " + zone.getName(), Level.INFO);
 		} else {
 			// create a new monument
-			Monument monument = new Monument(this.args[0], zone, player.getLocation());
+			Monument monument = new Monument(this.args[0], zone, player.getLocation(), MonumentMode.getEnum(args[1]));
 			zone.getMonuments().add(monument);
 			War.war.log(this.getSender().getName() + " created monument " + monument.getName() + " in warzone " + zone.getName(), Level.INFO);
 		}

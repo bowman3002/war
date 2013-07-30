@@ -156,6 +156,11 @@ public class WarBlockListener implements Listener {
 			cancelAndKeepItem(event);
 			return;
 		}
+                
+                //team colored wool
+                if(team!=null && block.getData() == team.getKind().getData()) {
+                    player.getInventory().addItem(new ItemStack(Material.WOOL, 1, team.getKind().getData()));
+                }
 	}
 	
 	private void cancelAndKeepItem(BlockPlaceEvent event) {

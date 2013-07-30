@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import com.tommytony.war.Team;
 import com.tommytony.war.War;
 import com.tommytony.war.Warzone;
+import com.tommytony.war.config.MonumentMode;
 import com.tommytony.war.config.TeamConfig;
 import com.tommytony.war.config.TeamKind;
 import com.tommytony.war.structure.Bomb;
@@ -140,7 +141,8 @@ public class WarzoneYmlMapper {
 						int monumentY = warzoneRootSection.getInt(monumentPrefix + "y");
 						int monumentZ = warzoneRootSection.getInt(monumentPrefix + "z");
 						int monumentYaw = warzoneRootSection.getInt(monumentPrefix + "yaw");
-						Monument monument = new Monument(monumentName, warzone, new Location(world, monumentX, monumentY, monumentZ, monumentYaw, 0));
+                                                MonumentMode monumentMode = MonumentMode.getEnum(warzoneRootSection.getString(monumentPrefix + "mode", "Medic"));
+						Monument monument = new Monument(monumentName, warzone, new Location(world, monumentX, monumentY, monumentZ, monumentYaw, 0), monumentMode);
 						warzone.getMonuments().add(monument);
 					}
 				}
@@ -371,6 +373,18 @@ public class WarzoneYmlMapper {
 			
 			warzone.setWarzoneMaterials(new WarzoneMaterials(mainId, (byte)mainData, standId, (byte)standData, lightId, (byte)lightData));
 			
+                        //Load extraSpawns
+                        List<String> s=warzoneRootSection.getStringList("ExtraSpawns");
+                        Location[] locs=new Location[s.size()];
+                        for(int i=0; i<s.size(); i++)
+                        {
+                            locs[i] = stringToLoc(s.get(i));
+                        }
+                        for(Location l:locs)
+                        {
+                            warzone.addExtraSpawn(l);
+                        }
+                        
 			return warzone;
 		}
 		
@@ -469,12 +483,13 @@ public class WarzoneYmlMapper {
 			monumentsSection.set("names", monumentNames);
 			
 			for (Monument monument : warzone.getMonuments()) {
-				
+                                
 				ConfigurationSection monumentSection = monumentsSection.createSection(monument.getName());
 				monumentSection.set("x", monument.getLocation().getBlockX());
 				monumentSection.set("y", monument.getLocation().getBlockY());
 				monumentSection.set("z", monument.getLocation().getBlockZ());
 				monumentSection.set("yaw", toIntYaw(monument.getLocation().getYaw()));
+                                monumentSection.set("mode", monument.getMode().getName());
 			}
 		}
 		
@@ -614,6 +629,13 @@ public class WarzoneYmlMapper {
 			VolumeMapper.save(warzone.getLobby().getVolume(), warzone.getName());
 		}
 		
+                //Save extra spawns
+                String[] locs=new String[warzone.getExtraSpawns().size()];
+                for(int i=0; i<locs.length; i++) {
+                    locs[i] = locToString(warzone.getExtraSpawns().get(i), warzone.getWorld());
+                }
+                warzoneRootSection.set("ExtraSpawns", locs);
+                
 		// Save to disk
 		try {
 			File warzoneConfigFile = new File(War.war.getDataFolder().getPath() + "/warzone-" + warzone.getName() + ".yml");
@@ -654,4 +676,15 @@ public class WarzoneYmlMapper {
 		}
 		oldZoneFolder.delete();
 	}
+        
+        public static String locToString(Location l, World w)
+        {
+            return l.getX()+";"+l.getY()+";"+l.getZ()+";"+w.getName();
+        }
+        
+        public static Location stringToLoc(String s)
+        {
+            String[] coords=s.split(";");
+            return new Location(War.war.getServer().getWorld(coords[3]), Double.valueOf(coords[0]), Double.valueOf(coords[1]), Double.valueOf(coords[2]));
+        }
 }

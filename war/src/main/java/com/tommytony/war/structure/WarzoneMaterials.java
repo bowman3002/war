@@ -15,6 +15,9 @@ public class WarzoneMaterials {
 
 	private int lightId;
 	private byte lightData;
+        
+        private int lockId;
+        private byte lockData;
 	
 	public WarzoneMaterials(int mainId, byte mainData, int standId, byte standData, int lightId, byte lightData) {
 		// Make sure we are using legal blocks or AIR as material
@@ -76,6 +79,14 @@ public class WarzoneMaterials {
 	public byte getStandData() {
 		return standData;
 	}
+        
+        public int getLockId() {
+                return lockId;
+        }
+        
+        public byte getLockData() {
+                return lockData;
+        }
 
 	public void setMainId(int mainId) {
 		this.mainId = mainId;
@@ -100,5 +111,12 @@ public class WarzoneMaterials {
 	public void setLightData(byte lightData) {
 		this.lightData = lightData;
 	}
-	
+        
+	public void setLockId(int lI){
+            this.lockId=lI;
+        }
+        
+        public void setLockData(byte lD){
+            this.lockData=lD;
+        }
 }
