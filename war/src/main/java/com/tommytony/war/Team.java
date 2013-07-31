@@ -138,7 +138,7 @@ public class Team {
 		byte lightData = this.warzone.getWarzoneMaterials().getLightData();
 
 		TeamSpawnStyle style = warzone.getWarzoneConfig().resolveSpawnStyle();
-		if (style.equals(TeamSpawnStyle.INVISIBLE)) {
+		if (style.equals(TeamSpawnStyle.INVISIBLE) || style.equals(TeamSpawnStyle.RANDOM)) {
 			// nothing but glowstone
 			Block lightBlock = this.warzone.getWorld().getBlockAt(x, y - 1, z);
 			lightBlock.setType(light);
