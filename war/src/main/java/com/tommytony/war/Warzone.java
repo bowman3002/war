@@ -40,6 +40,7 @@ import com.tommytony.war.structure.Bomb;
 import com.tommytony.war.structure.Cake;
 import com.tommytony.war.structure.Monument;
 import com.tommytony.war.structure.HubLobbyMaterials;
+import com.tommytony.war.structure.NeutralFlag;
 import com.tommytony.war.structure.WarzoneMaterials;
 import com.tommytony.war.structure.ZoneLobby;
 import com.tommytony.war.structure.ZoneWallGuard;
@@ -64,6 +65,7 @@ public class Warzone {
 	private ZoneVolume volume;
 	private World world;
 	private final List<Team> teams = new ArrayList<Team>();
+        private List<NeutralFlag> neutralFlags = new ArrayList<NeutralFlag>();
 	private final List<Monument> monuments = new ArrayList<Monument>();
 	private final List<Bomb> bombs = new ArrayList<Bomb>();
 	private final List<Cake> cakes = new ArrayList<Cake>();
@@ -1654,5 +1656,32 @@ public class Warzone {
      */
     public void setObjective(Objective score) {
         this.objective = score;
+    }
+
+    /**
+     * @return the neutralFlags
+     */
+    public List<NeutralFlag> getNeutralFlags() {
+        return neutralFlags;
+    }
+
+    /**
+     * @param neutralFlags the neutralFlags to set
+     */
+    public void setNeutralFlags(List<NeutralFlag> neutralFlags) {
+        this.neutralFlags = neutralFlags;
+    }
+    
+    public NeutralFlag getNeutralFlag(String name) {
+        for(NeutralFlag nF:neutralFlags) {
+            if(nF.getName().equalsIgnoreCase(name)) {
+                return nF;
+            }
+        }
+        return null;
+    }
+    
+    public void addNeutralFlag(NeutralFlag nF) {
+        this.neutralFlags.add(nF);
     }
 }
