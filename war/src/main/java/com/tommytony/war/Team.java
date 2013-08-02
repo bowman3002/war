@@ -98,7 +98,7 @@ public class Team {
 		int z = this.teamSpawn.getBlockZ();
 
 		TeamSpawnStyle style = warzone.getWarzoneConfig().resolveSpawnStyle();
-		if (style.equals(TeamSpawnStyle.INVISIBLE)) {
+		if (style.equals(TeamSpawnStyle.INVISIBLE) || style.equals(TeamSpawnStyle.RANDOM)) {
 			this.spawnVolume.setCornerOne(this.warzone.getWorld().getBlockAt(x, y - 1, z));
 			this.spawnVolume.setCornerTwo(this.warzone.getWorld().getBlockAt(x, y + 3, z));
 		} else if (style.equals(TeamSpawnStyle.SMALL)) {
@@ -168,7 +168,7 @@ public class Team {
 		Block signBlock = null;
 		int signData = 0;
 
-		if (style.equals(TeamSpawnStyle.INVISIBLE)) {
+		if (style.equals(TeamSpawnStyle.INVISIBLE) || style.equals(TeamSpawnStyle.RANDOM)) {
 			// INVISIBLE style
 			signBlock = this.warzone.getWorld().getBlockAt(x, y, z);
 			if (yaw >= 0 && yaw < 90) {
