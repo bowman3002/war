@@ -48,7 +48,7 @@ public class Team {
 	private Volume flagVolume;
 	private final Warzone warzone;
 	private TeamKind kind;
-        private org.bukkit.scoreboard.Team scoreTeam;
+        //private org.bukkit.scoreboard.Team scoreTeam;
         private Score score;
         private Score lives;
 
@@ -64,15 +64,15 @@ public class Team {
 		this.setSpawnVolume(new Volume(name, warzone.getWorld()));
 		this.kind = kind;
 		this.setFlagVolume(null); // no flag at the start
-                scoreTeam=warzone.getBoard().registerNewTeam(name);
-                scoreTeam.setCanSeeFriendlyInvisibles(true);
-                scoreTeam.setDisplayName(kind.getColor() + name);
                 
-                score = warzone.getObjective().getScore(Bukkit.getOfflinePlayer(kind.getColor() + name + "Points"));
-                score.setScore(points);   
-                
-                lives = warzone.getObjective().getScore(Bukkit.getOfflinePlayer(kind.getColor() + name + "Lives"));
-                lives.setScore(getRemainingLifes());
+                if(kind!=null) {
+                    //null teamkind is signal for a stolen neutral flag
+                    score = warzone.getObjective().getScore(Bukkit.getOfflinePlayer(kind.getColor() + name + "Points"));
+                    score.setScore(points);   
+
+                    lives = warzone.getObjective().getScore(Bukkit.getOfflinePlayer(kind.getColor() + name + "Lives"));
+                    lives.setScore(getRemainingLifes());
+                }
 	}
 
 	public static Team getTeamByPlayerName(String playerName) {
@@ -393,7 +393,6 @@ public class Team {
 
 	public void addPlayer(Player player) {
 		this.players.add(player);
-                scoreTeam.addPlayer(player);
                 player.setScoreboard(warzone.getBoard());
 		if (War.war.isTagServer()) {
 			TagAPI.refreshPlayer(player);
@@ -438,7 +437,7 @@ public class Team {
 		for (Player player : this.players) {
 			if (player.getName().equals(name)) {
 				thePlayer = player;
-                                scoreTeam.removePlayer(player);
+                                //scoreTeam.removePlayer(player);
                                 thePlayer.setScoreboard(warzone.getManager().getNewScoreboard());
 			}
 		}

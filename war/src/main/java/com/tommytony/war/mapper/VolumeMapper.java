@@ -171,35 +171,36 @@ public class VolumeMapper {
 					for (int j = 0; j < volume.getSizeY(); j++) {
 						for (int k = 0; k < volume.getSizeZ(); k++) {
 							try {
-								int typeId = volume.getBlockTypes()[i][j][k];
-								byte data = volume.getBlockDatas()[i][j][k];
-								out.write(typeId + "," + data + ",");
-								if (typeId == Material.WALL_SIGN.getId() || typeId == Material.SIGN_POST.getId()) {
-									// Signs
-									String extra = "";
-									String[] lines = volume.getSignLines().get("sign-" + i + "-" + j + "-" + k);
-									if (lines != null) {
-										for (String line : lines) {
-											extra += line + ";;";
-										}
-										out.write(extra);
-									}
-								} else if (typeId == Material.CHEST.getId()) {
-									// Chests
-									String extra = "";
-									List<ItemStack> contents = volume.getInvBlockContents().get("chest-" + i + "-" + j + "-" + k);
-									if (contents != null) {
-										out.write(buildInventoryStringFromItemList(contents));
-										out.write(extra);
-									}
-								} else if (typeId == Material.DISPENSER.getId()) {
-									// Dispensers
-									List<ItemStack> contents = volume.getInvBlockContents().get("dispenser-" + i + "-" + j + "-" + k);
-									if (contents != null) {
-										out.write(buildInventoryStringFromItemList(contents));
-									}
-								}
-								out.newLine();
+                                                            volume.getBlockTypes();
+                                                                    int typeId = volume.getBlockTypes()[i][j][k];
+                                                                    byte data = volume.getBlockDatas()[i][j][k];
+                                                                    out.write(typeId + "," + data + ",");
+                                                                    if (typeId == Material.WALL_SIGN.getId() || typeId == Material.SIGN_POST.getId()) {
+                                                                            // Signs
+                                                                            String extra = "";
+                                                                            String[] lines = volume.getSignLines().get("sign-" + i + "-" + j + "-" + k);
+                                                                            if (lines != null) {
+                                                                                    for (String line : lines) {
+                                                                                            extra += line + ";;";
+                                                                                    }
+                                                                                    out.write(extra);
+                                                                            }
+                                                                    } else if (typeId == Material.CHEST.getId()) {
+                                                                            // Chests
+                                                                            String extra = "";
+                                                                            List<ItemStack> contents = volume.getInvBlockContents().get("chest-" + i + "-" + j + "-" + k);
+                                                                            if (contents != null) {
+                                                                                    out.write(buildInventoryStringFromItemList(contents));
+                                                                                    out.write(extra);
+                                                                            }
+                                                                    } else if (typeId == Material.DISPENSER.getId()) {
+                                                                            // Dispensers
+                                                                            List<ItemStack> contents = volume.getInvBlockContents().get("dispenser-" + i + "-" + j + "-" + k);
+                                                                            if (contents != null) {
+                                                                                    out.write(buildInventoryStringFromItemList(contents));
+                                                                            }
+                                                                    }
+                                                                    out.newLine();
 							} catch (Exception e) {
 								War.war.log("Unexpected error while writing block into volume " + volume.getName() + " file for zone " + zoneName + ". Blocks written so far: " + blockWrites + "Position: x:" + i + " y:" + j + " z:" + k + ". " + e.getClass().getName() + " " + e.getMessage(), Level.WARNING);
 								e.printStackTrace();

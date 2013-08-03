@@ -5,7 +5,6 @@ import org.bukkit.Material;
 import org.getspout.spoutapi.gui.Color;
 
 public enum TeamKind {
-	WHITE ((byte) 0, Material.WOOL, ChatColor.WHITE, 450),
 	ORANGE ((byte) 1, Material.WOOL, ChatColor.GOLD, 51),
 	MAGENTA ((byte) 2, Material.WOOL, ChatColor.LIGHT_PURPLE, 353),
 	BLUE ((byte) 3, Material.WOOL, ChatColor.BLUE, 23),

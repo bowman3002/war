@@ -25,6 +25,7 @@ import com.tommytony.war.structure.Bomb;
 import com.tommytony.war.structure.Cake;
 import com.tommytony.war.structure.HubLobbyMaterials;
 import com.tommytony.war.structure.Monument;
+import com.tommytony.war.structure.NeutralFlag;
 import com.tommytony.war.structure.WarzoneMaterials;
 import com.tommytony.war.structure.ZoneLobby;
 import com.tommytony.war.utility.Direction;
@@ -144,6 +145,26 @@ public class WarzoneYmlMapper {
                                                 MonumentMode monumentMode = MonumentMode.getEnum(warzoneRootSection.getString(monumentPrefix + "mode", "Medic"));
 						Monument monument = new Monument(monumentName, warzone, new Location(world, monumentX, monumentY, monumentZ, monumentYaw, 0), monumentMode);
 						warzone.getMonuments().add(monument);
+					}
+				}
+			}
+                        
+                        // neutral flag
+			if (warzoneRootSection.contains(zoneInfoPrefix + "nFlags")) {
+				List<String> nFlagsNames = warzoneRootSection.getStringList(zoneInfoPrefix + "nFlags.names");
+				for (String nFlagName : nFlagsNames) {
+					if (nFlagName != null && !nFlagName.equals("")) {
+						String nFlagPrefix = zoneInfoPrefix + "nFlags." + nFlagName + ".";
+						if (!warzoneRootSection.contains(nFlagPrefix + "x")) {
+							// try lowercase instead
+							nFlagPrefix = zoneInfoPrefix + "nFlags." + nFlagName.toLowerCase() + ".";
+						}
+						int nFlagX = warzoneRootSection.getInt(nFlagPrefix + "x");
+						int nFlagY = warzoneRootSection.getInt(nFlagPrefix + "y");
+						int nFlagZ = warzoneRootSection.getInt(nFlagPrefix + "z");
+						int nFlagYaw = warzoneRootSection.getInt(nFlagPrefix + "yaw");
+						NeutralFlag nF = new NeutralFlag(nFlagName, new Location(world, nFlagX, nFlagY, nFlagZ, nFlagYaw, 0), warzone);
+						warzone.addNeutralFlag(nF);
 					}
 				}
 			}
@@ -267,6 +288,11 @@ public class WarzoneYmlMapper {
 			for (Monument monument : warzone.getMonuments()) {
 				monument.setVolume(VolumeMapper.loadVolume(monument.getName(), warzone.getName(), world));
 			}
+                        
+                        // neutralFlag blocks
+                        for(NeutralFlag nF : warzone.getNeutralFlags()) {
+                                nF.setFlagVolume(VolumeMapper.loadVolume(nF.getName(), warzone.getName(), world));
+                        }
 			
 			// bomb blocks
 			for (Bomb bomb : warzone.getBombs()) {
@@ -492,6 +518,26 @@ public class WarzoneYmlMapper {
                                 monumentSection.set("mode", monument.getMode().getName());
 			}
 		}
+                
+                // neutral flags
+		if (warzone.getNeutralFlags().size() > 0) {
+			ConfigurationSection nFlagsSection = warzoneInfoSection.createSection("nFlags");
+			
+			List<String> nFlagNames = new ArrayList<String>();
+			for (NeutralFlag nF : warzone.getNeutralFlags()) {
+				nFlagNames.add(nF.getName());
+			}
+			nFlagsSection.set("names", nFlagNames);
+			
+			for (NeutralFlag nF : warzone.getNeutralFlags()) {
+                                
+				ConfigurationSection nFlagSection = nFlagsSection.createSection(nF.getName());
+				nFlagSection.set("x", nF.getLocation().getBlockX());
+				nFlagSection.set("y", nF.getLocation().getBlockY());
+				nFlagSection.set("z", nF.getLocation().getBlockZ());
+				nFlagSection.set("yaw", toIntYaw(nF.getLocation().getYaw()));
+			}
+		}
 		
 		// bombs
 		if (warzone.getBombs().size() > 0) {
@@ -606,6 +652,11 @@ public class WarzoneYmlMapper {
 		for (Monument monument : warzone.getMonuments()) {
 			VolumeMapper.save(monument.getVolume(), warzone.getName());
 		}
+                
+                // neutralFlag blocks
+                for(NeutralFlag nF : warzone.getNeutralFlags()) {
+                        VolumeMapper.save(nF.getFlagVolume(), warzone.getName());
+                }
 		
 		// bomb blocks
 		for (Bomb bomb : warzone.getBombs()) {
