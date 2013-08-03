@@ -23,12 +23,14 @@ import com.tommytony.war.Team;
 import com.tommytony.war.War;
 import com.tommytony.war.Warzone;
 import com.tommytony.war.config.FlagReturn;
+import com.tommytony.war.config.TeamKind;
 import com.tommytony.war.config.WarConfig;
 import com.tommytony.war.config.WarzoneConfig;
 import com.tommytony.war.spout.SpoutDisplayer;
 import com.tommytony.war.structure.Bomb;
 import com.tommytony.war.structure.Cake;
 import com.tommytony.war.structure.Monument;
+import com.tommytony.war.structure.NeutralFlag;
 
 /**
  *
@@ -296,7 +298,7 @@ public class WarBlockListener implements Listener {
 				}
 			}
 			// stealing of flag
-			if (team != null && warzone.isEnemyTeamFlagBlock(team, block)) {
+			if (/*team != null &&*/ warzone.isEnemyTeamFlagBlock(team, block)) {
 				if (warzone.isFlagThief(player.getName())) {
 					// detect audacious thieves
 					War.war.badMsg(player, "You can only steal one flag at a time!");
@@ -304,7 +306,50 @@ public class WarBlockListener implements Listener {
 					War.war.badMsg(player, "You can only steal one thing at a time!");
 				} else {
 					Team lostFlagTeam = warzone.getTeamForFlagBlock(block);
-					if (lostFlagTeam.getPlayers().size() != 0) {
+                                        if(lostFlagTeam == null) {
+                                            //Block might be neutral flag
+                                            NeutralFlag nF = warzone.getNeutralFlag(block);
+                                            if (nF !=null){
+                                                //Block is neutral flag
+                                                System.out.println("WarBlockListener.314");
+                                                nF.setStolen(true);
+						ItemStack teamKindBlock = new ItemStack(Material.WOOL, 1, (short) 0);
+						player.getInventory().clear();
+						player.getInventory().addItem(teamKindBlock);
+						warzone.addFlagThief(new Team(nF.getName(), null, null, warzone), player.getName());
+						block.setType(Material.AIR);
+
+						String spawnOrFlag = "spawn or flag";
+						if (team.getTeamConfig().resolveFlagReturn().equals(FlagReturn.FLAG) 
+								|| team.getTeamConfig().resolveFlagReturn() == FlagReturn.SPAWN) {
+							spawnOrFlag = team.getTeamConfig().resolveFlagReturn().toString();
+						}
+
+						for (Team t : warzone.getTeams()) {
+							t.teamcast(player.getName() + ChatColor.WHITE + " stole neutral flag " + nF.getName());
+							
+								if (War.war.isSpoutServer()) {
+									for (Player p : t.getPlayers()) {
+										SpoutPlayer sp = SpoutManager.getPlayer(p);
+										if (sp.isSpoutCraftEnabled()) {
+							                sp.sendNotification(
+							                		SpoutDisplayer.cleanForNotification(team.getKind().getColor() + player.getName() + ChatColor.YELLOW + " stole"),
+							                		SpoutDisplayer.cleanForNotification(ChatColor.YELLOW + "your flag!"),
+							                		Material.WOOL,
+							                		(byte) 0,
+							                		5000);
+										}
+									}
+								}
+								t.teamcast("Prevent " + team.getKind().getColor() + player.getName() + ChatColor.WHITE
+										+ " from reaching team " + team.getName() + "'s " + spawnOrFlag + ".");
+							
+						}
+
+
+						War.war.msg(player, "You have team neutral flag " + nF.getName() + ". Reach your team " + spawnOrFlag + " to capture it!");
+                                            }
+					} else if (lostFlagTeam.getPlayers().size() != 0) {
 						// player just broke the flag block of other team: cancel to avoid drop, give player the block, set block to air
 						ItemStack teamKindBlock = new ItemStack(lostFlagTeam.getKind().getMaterial(), 1, (short) 1, new Byte(lostFlagTeam.getKind().getData()));
 						player.getInventory().clear();
@@ -341,9 +386,9 @@ public class WarBlockListener implements Listener {
 
 
 						War.war.msg(player, "You have team " + lostFlagTeam.getName() + "'s flag. Reach your team " + spawnOrFlag + " to capture it!");
-					} else {
-						War.war.msg(player, "You can't steal team " + lostFlagTeam.getName() + "'s flag since no players are on that team.");
-					}
+					} else if(lostFlagTeam.getPlayers().size() == 0) {
+                                            War.war.msg(player, "You can't steal team " + lostFlagTeam.getName() + "'s flag since no players are on that team.");
+                                        }
 				}
 				event.setCancelled(true);
 				return;

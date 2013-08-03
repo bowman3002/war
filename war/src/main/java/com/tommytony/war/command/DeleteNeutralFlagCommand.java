@@ -64,8 +64,10 @@ public class DeleteNeutralFlagCommand extends AbstractZoneMakerCommand {
             }
             if (nFlag != null) {
                     nFlag.deleteFlag();
+                    zone.deleteNeutalFlag(nFlag);
 
                     WarzoneYmlMapper.save(zone);
+                    zone.reinitialize();
                     this.msg(nFlag.getName() + " flag removed.");
                     War.war.log(this.getSender().getName() + " deleted neutral flag " + nFlag.getName() + " in warzone " + zone.getName(), Level.INFO);
             } else {

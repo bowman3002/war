@@ -320,6 +320,12 @@ public class Warzone {
 			monument.getVolume().resetBlocks();
 			monument.addMonumentBlocks();
 		}
+                
+                // reset neutral flags
+		for (NeutralFlag nF : neutralFlags) {
+			nF.getFlagVolume().resetBlocks();
+			nF.initializeFlag();
+		}
 		
 		// reset bombs
 		for (Bomb bomb : this.bombs) {
@@ -661,6 +667,11 @@ public class Warzone {
 					return true;
 				}
 			}
+                        for(NeutralFlag nF: this.neutralFlags) {
+                                if(nF.getFlagVolume().contains(block)) {
+                                        return true;
+                                }
+                        }
 			for (Bomb b : this.bombs) {
 				if (b.getVolume().contains(block)) {
 					return true;
@@ -1151,6 +1162,11 @@ public class Warzone {
 				return true;
 			}
 		}
+                for(NeutralFlag nF : neutralFlags) {
+                    if(nF.isFlagBlock(block)) {
+                        return true;
+                    }
+                }
 		return false;
 	}
 	
@@ -1281,7 +1297,7 @@ public class Warzone {
 				return true;
 			}
 		}
-		return false;
+                return false;
 	}
 	
 	public void handleScoreCapReached(String winnersStr) {
@@ -1683,5 +1699,27 @@ public class Warzone {
     
     public void addNeutralFlag(NeutralFlag nF) {
         this.neutralFlags.add(nF);
+    }
+    
+    public NeutralFlag getNeutralFlag(Location loc) {
+        for(NeutralFlag nF:neutralFlags) {
+            if(nF.getLocation().equals(loc)) {
+                return nF;
+            }
+        }
+        return null;
+    }
+    
+    public NeutralFlag getNeutralFlag(Block block) {
+        for(NeutralFlag nF:neutralFlags) {
+            if(nF.isFlagBlock(block)) {
+                return nF;
+            }
+        }
+        return null;
+    }
+
+    public void deleteNeutalFlag(NeutralFlag nFlag) {
+        neutralFlags.remove(nFlag);
     }
 }

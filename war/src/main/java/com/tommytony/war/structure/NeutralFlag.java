@@ -30,6 +30,7 @@ public class NeutralFlag {
     private String name;
     private Volume flagVolume;
     private Warzone warzone;
+    private boolean stolen;
     
     
     public NeutralFlag(String name, Location flagLoc, Warzone warzone) {
@@ -38,20 +39,21 @@ public class NeutralFlag {
         this.loc = flagLoc;
         setFlagVolume();
         initializeFlag();
+        getFlagVolume().saveBlocks();
     }
 
     /**
      * @return the teamFlag
      */
     public Location getLocation() {
-        return loc;
+        return getLoc();
     }
 
     /**
      * @param teamFlag the teamFlag to set
      */
     public void setLocation(Location teamFlag) {
-        this.loc = teamFlag;
+        this.setLoc(teamFlag);
     }
 
     /**
@@ -98,14 +100,14 @@ public class NeutralFlag {
     
     private void setFlagVolume() {
 		if (this.flagVolume == null) {
-			this.flagVolume = new Volume(this.getName() + "flag", this.warzone.getWorld());
+			this.flagVolume = new Volume(this.getName(), this.warzone.getWorld());
 		}
 		if (this.flagVolume.isSaved()) {
 			this.flagVolume.resetBlocks();
 		}
-		int x = this.loc.getBlockX();
-		int y = this.loc.getBlockY();
-		int z = this.loc.getBlockZ();
+		int x = this.getLoc().getBlockX();
+		int y = this.getLoc().getBlockY();
+		int z = this.getLoc().getBlockZ();
 		this.flagVolume.setCornerOne(this.warzone.getWorld().getBlockAt(x - 1, y - 1, z - 1));
 		this.flagVolume.setCornerTwo(this.warzone.getWorld().getBlockAt(x + 1, y + 3, z + 1));
 	}
@@ -129,9 +131,9 @@ public class NeutralFlag {
 		airGap.setToMaterial(Material.AIR);
 
 		// Set the flag blocks
-		int x = this.loc.getBlockX();
-		int y = this.loc.getBlockY();
-		int z = this.loc.getBlockZ();
+		int x = this.getLoc().getBlockX();
+		int y = this.getLoc().getBlockY();
+		int z = this.getLoc().getBlockZ();
 		
 		Material main = Material.getMaterial(this.warzone.getWarzoneMaterials().getMainId());
 		byte mainData = this.warzone.getWarzoneMaterials().getMainData();
@@ -175,10 +177,10 @@ public class NeutralFlag {
 
 		// Flag post using Orientation
 		int yaw = 0;
-		if (this.loc.getYaw() >= 0) {
-			yaw = (int) (this.loc.getYaw() % 360);
+		if (this.getLoc().getYaw() >= 0) {
+			yaw = (int) (this.getLoc().getYaw() % 360);
 		} else {
-			yaw = (int) (360 + (this.loc.getYaw() % 360));
+			yaw = (int) (360 + (this.getLoc().getYaw() % 360));
 		}
 		BlockFace facing = null;
 		BlockFace opposite = null;
@@ -222,7 +224,7 @@ public class NeutralFlag {
 	}
         
         public final void resetFlag(Location flagLoc) {
-            this.loc = flagLoc;
+            this.setLoc(flagLoc);
             setFlagVolume();
             initializeFlag();
         }
@@ -230,12 +232,52 @@ public class NeutralFlag {
     public void deleteFlag() {
         this.getFlagVolume().resetBlocks();
         this.setFlagVolume(null);
-        this.loc = null;
+        this.setLoc(null);
 
         // remove volume file
         String filePath = War.war.getDataFolder().getPath() + "/dat/warzone-" + this.warzone.getName() + "/volume-" + this.getName() + "flag.dat";
         if (!new File(filePath).delete()) {			
                 War.war.log("Failed to delete file " + filePath, Level.WARNING);
         }
+    }
+
+    /**
+     * @return the stolen
+     */
+    public boolean isStolen() {
+        return stolen;
+    }
+
+    /**
+     * @param stolen the stolen to set
+     */
+    public void setStolen(boolean stolen) {
+        this.stolen = stolen;
+    }
+
+    /**
+     * @return the loc
+     */
+    public Location getLoc() {
+        return loc;
+    }
+
+    /**
+     * @param loc the loc to set
+     */
+    public void setLoc(Location loc) {
+        this.loc = loc;
+    }
+    
+    public boolean isFlagBlock(Block block) {
+        if (this.loc != null) {
+                int flagX = this.loc.getBlockX();
+                int flagY = this.loc.getBlockY() + 1;
+                int flagZ = this.loc.getBlockZ();
+                if (block.getX() == flagX && block.getY() == flagY && block.getZ() == flagZ) {
+                        return true;
+                }
+        }
+        return false;
     }
 }

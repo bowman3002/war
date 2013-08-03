@@ -68,8 +68,15 @@ public class HelmetProtectionTask implements Runnable {
 					// check for thieves without their treasure in their hands
 					if (zone.isFlagThief(player.getName())) {
 						Team victim = zone.getVictimTeamForFlagThief(player.getName());
-						player.setItemInHand(null);
-						player.getInventory().addItem(new ItemStack(victim.getKind().getMaterial(), 2240, victim.getKind().getData(), victim.getKind().getData()));
+                                                if(victim.getKind()!=null) {
+                                                    //normal team flag thief
+                                                    player.setItemInHand(null);
+                                                    player.getInventory().addItem(new ItemStack(victim.getKind().getMaterial(), 1, victim.getKind().getData(), victim.getKind().getData()));
+                                                } else {
+                                                    //neutral flag thief
+                                                    player.setItemInHand(null);
+                                                    player.getInventory().addItem(new ItemStack(Material.WOOL, 1, (short)0));
+                                                }
 					} else if (zone.isBombThief(player.getName())) {
 						player.setItemInHand(null);
 						player.getInventory().addItem(new ItemStack(Material.TNT, 2240));

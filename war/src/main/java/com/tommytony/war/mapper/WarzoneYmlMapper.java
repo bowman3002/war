@@ -154,16 +154,16 @@ public class WarzoneYmlMapper {
 				List<String> nFlagsNames = warzoneRootSection.getStringList(zoneInfoPrefix + "nFlags.names");
 				for (String nFlagName : nFlagsNames) {
 					if (nFlagName != null && !nFlagName.equals("")) {
-						String monumentPrefix = zoneInfoPrefix + "monument." + nFlagName + ".";
-						if (!warzoneRootSection.contains(monumentPrefix + "x")) {
+						String nFlagPrefix = zoneInfoPrefix + "nFlags." + nFlagName + ".";
+						if (!warzoneRootSection.contains(nFlagPrefix + "x")) {
 							// try lowercase instead
-							monumentPrefix = zoneInfoPrefix + "monument." + nFlagName.toLowerCase() + ".";
+							nFlagPrefix = zoneInfoPrefix + "nFlags." + nFlagName.toLowerCase() + ".";
 						}
-						int nFlagX = warzoneRootSection.getInt(monumentPrefix + "x");
-						int nFlagY = warzoneRootSection.getInt(monumentPrefix + "y");
-						int nFlagZ = warzoneRootSection.getInt(monumentPrefix + "z");
-						int nFlagYaw = warzoneRootSection.getInt(monumentPrefix + "yaw");
-						NeutralFlag nF = new NeutralFlag(name, new Location(world, nFlagX, nFlagY, nFlagZ, nFlagYaw, 0), warzone);
+						int nFlagX = warzoneRootSection.getInt(nFlagPrefix + "x");
+						int nFlagY = warzoneRootSection.getInt(nFlagPrefix + "y");
+						int nFlagZ = warzoneRootSection.getInt(nFlagPrefix + "z");
+						int nFlagYaw = warzoneRootSection.getInt(nFlagPrefix + "yaw");
+						NeutralFlag nF = new NeutralFlag(nFlagName, new Location(world, nFlagX, nFlagY, nFlagZ, nFlagYaw, 0), warzone);
 						warzone.addNeutralFlag(nF);
 					}
 				}

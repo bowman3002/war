@@ -134,6 +134,11 @@ commands:
     usage: Creates/moves a team flag post for CTF. Must be standing in warzone.
         Ex -
         /setteamflag <diamond/iron/gold/white/orange/magenta/blue/green/pink/gray/purple/navy/brown/darkgreen/red/black/>
+  setneutralflag:
+    description: War> Creates/moves a neutral flag post for CTF.
+    usage: Creates/moves a neutral flag post for CTF. Must be standing in warzone.
+        Ex -
+        /setteamflag <name>
   setbomb:
     description: War> Creates or moves a bomb. Get the bomb to the other team's spawn. People from other teams can blow you up. 
     usage: Creates or moves a bomb. Get the bomb to the other team's spawn. People from other teams can blow you up. Must be standing in warzone.
@@ -169,6 +174,11 @@ commands:
     usage: Deletes the specified team's flag. Team and flag must exist. Provide a zone name if not standing in warzone or lobby.
         Ex -
         /deleteteamflag [zone-name] <team-color>
+  deleteneutralflag:
+    description: War> Deletes the specified neutral flag. Flag must exist.
+    usage: Deletes the specified neutral flag. Flag must exist. Provide a zone name if not standing in warzone or lobby.
+        Ex -
+        /deleteneutralflag [zone-name] <flag-name>
   deletemonument:
     description: War> Deletes the monument.
     usage: Deletes the monument. Provide a zone name if not standing in warzone or lobby.
