@@ -567,31 +567,44 @@ public class WarPlayerListener implements Listener {
 				if (System.currentTimeMillis() % 13 == 0) {
 					playerWarzone.getWorld().playEffect(player.getLocation(), Effect.POTION_BREAK, playerTeam.getKind().getPotionEffectColor());
 				}
+                                
+                                Team standingInSpawn = playerWarzone.getTeamBySpawn(player.getLocation());
 				
 				// Make sure game ends can't occur simultaneously. 
 				// See Warzone.handleDeath() for details.
 				boolean inSpawn = playerTeam.getSpawnVolume().contains(player.getLocation());
 				boolean inFlag = (playerTeam.getFlagVolume() != null && playerTeam.getFlagVolume().contains(player.getLocation()));
+                                boolean inOpponentSpawn = (standingInSpawn!=null);
 
 				if (playerTeam.getTeamConfig().resolveFlagReturn().equals(FlagReturn.BOTH)) {
-					if (!inSpawn && !inFlag) {
+                                        if (inOpponentSpawn){
+                                            War.war.badMsg(player, "You have to be in your spawn or flag to capture the flag!");
+                                            return;
+                                        } else if (!inSpawn && !inFlag) {
 						return;
 					}
 				} else if (playerTeam.getTeamConfig().resolveFlagReturn().equals(FlagReturn.SPAWN)) {
-					if (inFlag) {
+					if (inFlag || inOpponentSpawn) {
 						War.war.badMsg(player, "You have to capture the enemy flag at your team's spawn.");
 						return;
 					} else if (!inSpawn) {
 						return;
 					}
 				} else if (playerTeam.getTeamConfig().resolveFlagReturn().equals(FlagReturn.FLAG)) {
-					if (inSpawn) {
+					if (inSpawn || inOpponentSpawn) {
 						War.war.badMsg(player, "You have to capture the enemy flag at your team's flag.");
 						return;
 					} else if (!inFlag) {
 						return;
 					}
-				}
+				} else if(playerTeam.getTeamConfig().resolveFlagReturn().equals(FlagReturn.ENEMY)) {
+                                    if(inSpawn || inFlag) {
+                                        War.war.badMsg(player, "You have to be in the enemy's spawn to capture the flag!");
+                                        return;
+                                    } else if(!inOpponentSpawn) {
+                                        return;
+                                    }
+                                }
 				
 				if (!playerTeam.getPlayers().contains(player)) {
 					// Make sure player is still part of team, game may have ended while waiting)

@@ -1722,4 +1722,13 @@ public class Warzone {
     public void deleteNeutalFlag(NeutralFlag nFlag) {
         neutralFlags.remove(nFlag);
     }
+
+    public Team getTeamBySpawn(Location location) {
+        for(Team t:teams) {
+            if(t.getSpawnVolume().contains(location)) {
+                return t;
+            }
+        }
+        return null;
+    }
 }

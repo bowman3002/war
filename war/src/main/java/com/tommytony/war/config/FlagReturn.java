@@ -3,7 +3,8 @@ package com.tommytony.war.config;
 public enum FlagReturn {
 	BOTH,
 	FLAG,
-	SPAWN;
+	SPAWN,
+        ENEMY;
 
 	@Override
 	public String toString() {

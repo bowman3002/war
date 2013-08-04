@@ -311,7 +311,6 @@ public class WarBlockListener implements Listener {
                                             NeutralFlag nF = warzone.getNeutralFlag(block);
                                             if (nF !=null){
                                                 //Block is neutral flag
-                                                System.out.println("WarBlockListener.314");
                                                 nF.setStolen(true);
 						ItemStack teamKindBlock = new ItemStack(Material.WOOL, 1, (short) 0);
 						player.getInventory().clear();
@@ -319,11 +318,19 @@ public class WarBlockListener implements Listener {
 						warzone.addFlagThief(new Team(nF.getName(), null, null, warzone), player.getName());
 						block.setType(Material.AIR);
 
-						String spawnOrFlag = "spawn or flag";
-						if (team.getTeamConfig().resolveFlagReturn().equals(FlagReturn.FLAG) 
-								|| team.getTeamConfig().resolveFlagReturn() == FlagReturn.SPAWN) {
+						String spawnOrFlag = team.getName() + "'s spawn or flag";
+						/*if (team.getTeamConfig().resolveFlagReturn().equals(FlagReturn.FLAG) 
+								|| team.getTeamConfig().resolveFlagReturn() == FlagReturn.SPAWN
+                                                                || team.getTeamConfig().resolveFlagReturn() == FlagReturn.ENEMY) {
 							spawnOrFlag = team.getTeamConfig().resolveFlagReturn().toString();
-						}
+						}*/
+                                                if(team.getTeamConfig().resolveFlagReturn().equals(FlagReturn.FLAG)) {
+                                                    spawnOrFlag = team.getName() + "'s flag";
+                                                } else if(team.getTeamConfig().resolveFlagReturn().equals(FlagReturn.SPAWN)) {
+                                                    spawnOrFlag = team.getName() + "'s spawn";
+                                                } else if(team.getTeamConfig().resolveFlagReturn().equals(FlagReturn.ENEMY)) {
+                                                    spawnOrFlag = "an enemy's spawn";
+                                                }
 
 						for (Team t : warzone.getTeams()) {
 							t.teamcast(player.getName() + ChatColor.WHITE + " stole neutral flag " + nF.getName());
@@ -342,12 +349,12 @@ public class WarBlockListener implements Listener {
 									}
 								}
 								t.teamcast("Prevent " + team.getKind().getColor() + player.getName() + ChatColor.WHITE
-										+ " from reaching team " + team.getName() + "'s " + spawnOrFlag + ".");
+										+ " from reaching " + spawnOrFlag + ".");
 							
 						}
 
 
-						War.war.msg(player, "You have team neutral flag " + nF.getName() + ". Reach your team " + spawnOrFlag + " to capture it!");
+						War.war.msg(player, "You have a neutral flag " + nF.getName() + ". Reach " + spawnOrFlag + " to capture it!");
                                             }
 					} else if (lostFlagTeam.getPlayers().size() != 0) {
 						// player just broke the flag block of other team: cancel to avoid drop, give player the block, set block to air

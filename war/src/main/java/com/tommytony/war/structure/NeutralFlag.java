@@ -228,6 +228,11 @@ public class NeutralFlag {
             setFlagVolume();
             initializeFlag();
         }
+        
+        public final void resetFlag() {
+            setFlagVolume();
+            initializeFlag();
+        }
 
     public void deleteFlag() {
         this.getFlagVolume().resetBlocks();

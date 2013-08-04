@@ -22,6 +22,7 @@ import com.tommytony.war.config.TeamKind;
 import com.tommytony.war.config.TeamSpawnStyle;
 import com.tommytony.war.structure.Bomb;
 import com.tommytony.war.structure.Cake;
+import com.tommytony.war.structure.NeutralFlag;
 import com.tommytony.war.utility.Direction;
 import com.tommytony.war.utility.SignHelper;
 import com.tommytony.war.volume.BlockInfo;
@@ -446,12 +447,23 @@ public class Team {
 			
 			if (this.warzone.isFlagThief(thePlayer.getName())) {
 				Team victim = this.warzone.getVictimTeamForFlagThief(thePlayer.getName());
-				victim.getFlagVolume().resetBlocks();
-				victim.initializeTeamFlag();
-				this.warzone.removeFlagThief(thePlayer.getName());
-				for (Team t : this.warzone.getTeams()) {
-					t.teamcast("Team " + ChatColor.GREEN + victim.getName() + ChatColor.WHITE + " flag was returned.");
-				}
+                                if(victim.getKind()!=null) {
+                                    //Normal team flag thief
+                                    victim.getFlagVolume().resetBlocks();
+                                    victim.initializeTeamFlag();
+                                    this.warzone.removeFlagThief(thePlayer.getName());
+                                    for (Team t : this.warzone.getTeams()) {
+                                            t.teamcast("Team " + ChatColor.GREEN + victim.getName() + ChatColor.WHITE + " flag was returned.");
+                                    }
+                                } else {
+                                    //Neutral flag thief
+                                    NeutralFlag nF = warzone.getNeutralFlag(victim.getName());
+                                    nF.resetFlag();
+                                    warzone.removeFlagThief(thePlayer.getName());
+                                    for (Team t : this.warzone.getTeams()) {
+                                            t.teamcast("Neutral Flag " + nF.getName() + " was returned.");
+                                    }
+                                }
 			}
 			
 			if (this.warzone.isBombThief(thePlayer.getName())) {
