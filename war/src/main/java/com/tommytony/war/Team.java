@@ -22,6 +22,7 @@ import com.tommytony.war.config.TeamKind;
 import com.tommytony.war.config.TeamSpawnStyle;
 import com.tommytony.war.structure.Bomb;
 import com.tommytony.war.structure.Cake;
+import com.tommytony.war.structure.Monument;
 import com.tommytony.war.structure.NeutralFlag;
 import com.tommytony.war.utility.Direction;
 import com.tommytony.war.utility.SignHelper;
@@ -398,6 +399,7 @@ public class Team {
 		if (War.war.isTagServer()) {
 			TagAPI.refreshPlayer(player);
 		}
+                showObjectives(player);
 	}
 
 	public List<Player> getPlayers() {
@@ -439,6 +441,7 @@ public class Team {
 			if (player.getName().equals(name)) {
 				thePlayer = player;
                                 //scoreTeam.removePlayer(player);
+                                thePlayer.getScoreboard().resetScores(player);
                                 thePlayer.setScoreboard(warzone.getManager().getNewScoreboard());
 			}
 		}
@@ -511,12 +514,12 @@ public class Team {
 				atLeastOnePlayerOnOtherTeam = true;
 			}
 		}
-		if (atLeastOnePlayerOnTeam && atLeastOnePlayerOnOtherTeam) {
+		/*if (atLeastOnePlayerOnTeam && atLeastOnePlayerOnOtherTeam) {*/
 			this.points++;
                         score.setScore(score.getScore()+1);
-		} else if (!atLeastOnePlayerOnOtherTeam) {
+		/*} else if (!atLeastOnePlayerOnOtherTeam) {
 			this.teamcast("Can't score until at least one player joins another team.");
-		}
+		}*/
 	}
 
 	public int getPoints() {
@@ -729,5 +732,31 @@ public class Team {
             p.setHealth(20);
         }
         teamcast("You have been healed by Medic " + monumentName);
+    }
+
+    private void showObjectives(Player player) {
+        String objectives = ChatColor.AQUA + "Kill members of other teams! \n";
+        //Team flags
+        for(Team t:warzone.getTeams()) {
+            if(t.getTeamFlag()!=null && t!=this) {
+                objectives += "Capture team " + t.getName() + "'s flag \n";
+            } else if(t.getTeamFlag()!=null && t==this) {
+                objectives += "Protect your team's flag \n";
+            }
+        }
+        for(Monument m:warzone.getMonuments()) {
+            objectives += "Capture monument " + m.getName() + " with your team's wool \n";
+        }
+        for(NeutralFlag n:warzone.getNeutralFlags()) {
+            objectives += "Capture neutral flag " + n.getName() + "\n";
+        }
+        for(Bomb b:warzone.getBombs()) {
+            objectives += "Move bomb " + b.getName() + " to the opponent's spawn \n";
+        }
+        for(Cake c:warzone.getCakes()) {
+            objectives += "Move cake " + c.getName() + " to your spawn \n";
+        }
+        
+        War.war.msg(player, objectives);
     }
 }

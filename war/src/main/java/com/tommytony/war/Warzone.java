@@ -924,6 +924,9 @@ public class Warzone {
 					this.respawnPlayer(playerTeam, player);
 				} else {
 					// Handle team loss
+                                    if(killTeam!=null) {
+                                        killTeam.addPoint();
+                                    }
 					List<Team> teams = this.getTeams();
 					String scores = "";
 					for (Team t : teams) {

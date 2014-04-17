@@ -55,6 +55,9 @@ public class WarBlockListener implements Listener {
 		}
 
 		Team team = Team.getTeamByPlayerName(player.getName());
+                if(team == null) {
+                        return;
+                }
 		Warzone zone = Warzone.getZoneByLocation(player);
 		// Monument capturing
                 
